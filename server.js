@@ -79,9 +79,9 @@ app.get("/auth/strava/callback", async (req, res) => {
     //Fetch last run and gear data
     const data = await getLastRunAndGear(accessToken);
 
-    //Redirect to the frontend with user data
+    // Redirect to the frontend with user data
     const redirectUri = `http://localhost:5173/?data=${encodeURIComponent(
-      JSON.stringify(data)
+      JSON.stringify({ accessToken, lastRun: data.lastRun, gear: data.gear })
     )}`;
     res.redirect(redirectUri);
   } catch (error) {
