@@ -78,11 +78,12 @@ async function getLastRun(accessToken) {
 
     //Format data we want to send back
     return {
+      id: lastRun.id,
       name: lastRun.name,
       distance: (lastRun.distance / 1000).toFixed(2), //Convert meters to kilometers
       moving_time: (lastRun.moving_time / 60).toFixed(0) + "minutes", //Convert second to minutes
       date: new Date(lastRun.start_date).toLocaleDateString(),
-      map_picture: lastRun.map?.summary_polyline || "No map available",
+      summary_polyline: lastRun.map.summary_polyline,
     };
   } catch (error) {
     console.error("Error fetching last run data:", error);
