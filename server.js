@@ -15,7 +15,7 @@ app.use(express.json());
 app.get("/auth/strava/", (req, res) => {
   const clientId = process.env.STRAVA_CLIENT_ID;
   const redirectUri = "http://localhost:5000/auth/strava/callback";
-  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&approval_prompt=force&scope=activity:read`;
+  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&approval_prompt=force&scope=activity:read,profile:read_all`;
   res.redirect(authUrl);
 });
 
