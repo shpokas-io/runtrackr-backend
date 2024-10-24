@@ -41,9 +41,9 @@ app.get("/auth/strava/callback", async (req, res) => {
 
     const accessToken = response.data.access_token;
 
-    //Save accessTOken and fetch last run data
-    const lastRun = await getLastRun(accessToken);
-    res.json(lastRun);
+    //Fetch last run and gear data
+    const data = await getLastRunAndGear(AccessToken);
+    res.json(data);
   } catch (error) {
     console.error("Error during token exchange:", error);
     res.status(500).send("Error during token exchange");
@@ -62,7 +62,7 @@ async function getLastRun(accessToken) {
       }
     );
 
-    //FInd the first activity that is categotized as a "RUN"
+    //Find the first activity that is categotized as a "RUN"
 
     const lastRun = activitiesResponse.data.find(
       (activity) => activity.type === "Run"
@@ -81,6 +81,69 @@ async function getLastRun(accessToken) {
     };
   } catch (error) {
     console.error("Error fetching last run data:", error);
+    throw error;
+  }
+}
+
+//Function to fetch athlete profile and get gear ID
+async function getAthleteProfile(accessToken) {
+  try {
+    const response = await axios.get("https://www.strava.com/api/v3/athlete", {
+      headers: { Authorization: `Bearer &{accessToken}` },
+    });
+    //Assume the primary running shoes are the default gear
+    const primaryShoeId =
+      response.data.shoes && response.data.shoes.length > 0
+        ? response.data.shoes[0].id
+        : null;
+    return primaryShoeId;
+  } catch (error) {
+    console.error("Error fetching athlete profile:", error);
+    throw error;
+  }
+}
+
+//Function to fetch gear details using gear ID
+async function getGearDetails(accessToken, gearId) {
+  try {
+    const response = await axios.get(
+      `https://www.strava.com/api/v3/gear/${gearId}`,
+      {
+        header: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    return {
+      name: response.data.name,
+      totalMileage: (response.data.distance / 1000).toFixed(2) + "km", //conversion to km
+    };
+  } catch (error) {
+    console.error("Error fetching gear details:", error);
+    throw error;
+  }
+}
+
+//FUnction to get both last run and gear data
+async function getLastRunAndGear(accessToken) {
+  try {
+    //Fetch athlete`s primary running shoe gear ID
+    const gearId = await getAthleteProfile(accessToken);
+
+    //Fetch last run data
+    const lastRun = await getLastRun(accessToken);
+
+    let gearDetails = null;
+    if (gearId) {
+      //Fetch gear details if gear ID is available
+      gearDetails = await getGearDetails(accessToken, gearId);
+    }
+
+    return {
+      lastRun,
+      gear: gearDetails || { message: "No gear found or no shoes set" },
+    };
+  } catch (error) {
+    console.error("Error fetching last run and gear data:", error);
     throw error;
   }
 }
