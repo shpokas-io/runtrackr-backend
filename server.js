@@ -91,6 +91,8 @@ async function getAthleteProfile(accessToken) {
     const response = await axios.get("https://www.strava.com/api/v3/athlete", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
+    console.log("Athlete profile response:", response.data); //debug
+
     //Assume the primary running shoes are the default gear
     const primaryShoeId =
       response.data.shoes && response.data.shoes.length > 0
@@ -109,7 +111,7 @@ async function getGearDetails(accessToken, gearId) {
     const response = await axios.get(
       `https://www.strava.com/api/v3/gear/${gearId}`,
       {
-        header: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
 
