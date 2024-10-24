@@ -50,7 +50,7 @@ app.get("/auth/strava/callback", async (req, res) => {
   }
 });
 
-//FUnction to fetch the last run data using Strava API
+//Function to fetch the last run data using Strava API
 async function getLastRun(accessToken) {
   try {
     //Fetch athlete activities(last run data)
@@ -58,11 +58,18 @@ async function getLastRun(accessToken) {
       "https://www.strava.com/api/v3/athlete/activities",
       {
         headers: { Authorization: `Bearer ${accessToken}` },
-        params: { per_page: 1 }, // Fetch most recent activity
+        params: { per_page: 10 }, // Fetch most recent activity
       }
     );
 
-    const lastRun = activitiesResponse.data[0]; // Get the first recent activity
+    //FInd the first activity that is categotized as a "RUN"
+
+    const lastRun = activitiesResponse.data.find(
+      (activity) => activity.type === "Run"
+    );
+    if (!lastRun) {
+      return { message: "No run found in the recent activities" };
+    }
 
     //Format data we want to send back
     return {
