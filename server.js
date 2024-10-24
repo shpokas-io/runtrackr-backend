@@ -28,7 +28,7 @@ app.get("/auth/strava/callback", async (req, res) => {
   }
 
   try {
-    //exchange authorization code for access token
+    //Exchange authorization code for access token
     const response = await axios.post(
       "https://www.strava.com/oauth/token",
       querystring.stringify({
@@ -43,7 +43,12 @@ app.get("/auth/strava/callback", async (req, res) => {
 
     //Fetch last run and gear data
     const data = await getLastRunAndGear(accessToken);
-    res.json(data);
+
+    //Redirect to the frontend with user data
+    const redirectUri = `http://localhost:5173/?data=${encodeURIComponent(
+      JSON.stringify(data)
+    )}`;
+    res.redirect(redirectUri);
   } catch (error) {
     console.error("Error during token exchange:", error);
     res.status(500).send("Error during token exchange");
