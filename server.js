@@ -42,7 +42,7 @@ app.get("/auth/strava/callback", async (req, res) => {
     const accessToken = response.data.access_token;
 
     //Fetch last run and gear data
-    const data = await getLastRunAndGear(AccessToken);
+    const data = await getLastRunAndGear(accessToken);
     res.json(data);
   } catch (error) {
     console.error("Error during token exchange:", error);
