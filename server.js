@@ -4,11 +4,15 @@ const express = require("express");
 const axios = require("axios");
 const querystring = require("querystring");
 const cors = require("cors");
-
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Strava Auth Callback Route
@@ -17,6 +21,37 @@ app.get("/auth/strava/", (req, res) => {
   const redirectUri = "http://localhost:5000/auth/strava/callback";
   const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&approval_prompt=force&scope=activity:read,profile:read_all`;
   res.redirect(authUrl);
+});
+
+//ROute to fetch all runs
+app.get("/api/runs", async (req, res) => {
+  const accessToken = req.headers.authorization;
+
+  if (!accessToken) {
+    return res.status(401).send("Access token is required");
+  }
+
+  try {
+    //Fetch all activities from strava api
+    const response = await axios.get(
+      "https://www.strava.com/api/v3/athlete/activities",
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { per_page: 100, page: req.query.page || 1 },
+      }
+    );
+
+    //FIlter out only the runs
+    const runs = response.data
+      .filter((activity) => activity.type === "Run")
+      .slice(0, 10); // Limit to 10
+
+    //Send back to server
+    res.json(runs);
+  } catch (error) {
+    console.error("Error fetching runs:", error);
+    res.status(500).send("Error fetching runs");
+  }
 });
 
 //Callback route to handle auth
