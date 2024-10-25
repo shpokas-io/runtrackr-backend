@@ -47,7 +47,7 @@ app.get("/api/runs", async (req, res) => {
     const runs = response.data.filter((activity) => activity.type === "Run");
 
     //Calculate total kilometers run in the last week
-    const totalKilometers = runs.reduce((total, run) => {
+    const totalKilometersLastWeek = runs.reduce((total, run) => {
       const runDate = new Date(run.start_date);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
