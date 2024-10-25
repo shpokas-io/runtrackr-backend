@@ -46,11 +46,26 @@ app.get("/api/runs", async (req, res) => {
     //FIlter out only the runs
     const runs = response.data.filter((activity) => activity.type === "Run");
 
+    //Calculate total kilometers run in the last week
+    const totalKilometers = runs.reduce((total, run) => {
+      const runDate = new Date(run.start_date);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      if (runDate >= weekAgo) {
+        return total + run.distance / 1000; //conversion of meters to km
+      }
+      return total;
+    }, 0);
+
     //Paginate the results
     const paginatedRuns = runs.slice((page - 1) * limit, page * limit);
 
     //Send back to server
-    res.json({ runs: paginatedRuns, total: runs.length });
+    res.json({
+      runs: paginatedRuns,
+      total: runs.length,
+      totalKilometersLastWeek,
+    });
   } catch (error) {
     console.error("Error fetching runs:", error);
     res.status(500).send("Error fetching runs");
