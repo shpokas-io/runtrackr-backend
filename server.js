@@ -26,6 +26,8 @@ app.get("/auth/strava/", (req, res) => {
 //ROute to fetch all runs
 app.get("/api/runs", async (req, res) => {
   const accessToken = req.headers.authorization;
+  const page = parseInt(req.query.page) || 1; //Get the page number from query
+  const limit = 5; // number limit of runs per page
 
   if (!accessToken) {
     return res.status(401).send("Access token is required");
@@ -37,17 +39,18 @@ app.get("/api/runs", async (req, res) => {
       "https://www.strava.com/api/v3/athlete/activities",
       {
         headers: { Authorization: `Bearer ${accessToken}` },
-        params: { per_page: 100, page: req.query.page || 1 },
+        params: { per_page: 100, page: 1 },
       }
     );
 
     //FIlter out only the runs
-    const runs = response.data
-      .filter((activity) => activity.type === "Run")
-      .slice(0, 10); // Limit to 10
+    const runs = response.data.filter((activity) => activity.type === "Run");
+
+    //Paginate the results
+    const paginatedRuns = runs.slice((page - 1) * limit, page * limit);
 
     //Send back to server
-    res.json(runs);
+    res.json({ runs: paginatedRuns, total: runs.length });
   } catch (error) {
     console.error("Error fetching runs:", error);
     res.status(500).send("Error fetching runs");
