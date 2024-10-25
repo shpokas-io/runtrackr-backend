@@ -1,5 +1,5 @@
 const express = require("express");
-const { fetchRuns } = require("../controllers/api");
+const { fetchRuns } = require("../controllers/activityController");
 
 const router = express.Router();
 

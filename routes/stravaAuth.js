@@ -1,5 +1,8 @@
 const express = require("express");
-const { getAuthUrl, handleAuthCallback } = require("../controllers/stravaAuth");
+const {
+  getAuthUrl,
+  handleAuthCallback,
+} = require("../controllers/stravaAccessController");
 
 const router = express.Router();
 

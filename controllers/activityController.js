@@ -40,14 +40,33 @@ const fetchRuns = async (req, res) => {
 // Function to calculate total kilometers for a given week
 const calculateTotalKilometers = (runs, daysAgo) => {
   const comparisonDate = new Date();
-  comparisonDate.setDate(comparisonDate.getDate() - daysAgo);
-  return runs.reduce((total, run) => {
-    const runDate = new Date(run.start_date);
-    if (runDate >= comparisonDate) {
-      return total + run.distance / 1000; // conversion of meters to km
-    }
-    return total;
-  }, 0);
+
+  // If daysAgo is 0, we set the start of the week (Monday)
+  if (daysAgo === 0) {
+    const dayOfWeek = comparisonDate.getDay();
+    const firstDayOfWeek = new Date(comparisonDate);
+    firstDayOfWeek.setDate(
+      comparisonDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)
+    );
+    comparisonDate.setHours(0, 0, 0, 0); // Set to start of the day
+    return runs.reduce((total, run) => {
+      const runDate = new Date(run.start_date);
+      if (runDate >= firstDayOfWeek) {
+        return total + run.distance / 1000; // conversion of meters to km
+      }
+      return total;
+    }, 0);
+  } else {
+    // For last week
+    comparisonDate.setDate(comparisonDate.getDate() - daysAgo);
+    return runs.reduce((total, run) => {
+      const runDate = new Date(run.start_date);
+      if (runDate >= comparisonDate) {
+        return total + run.distance / 1000; // conversion of meters to km
+      }
+      return total;
+    }, 0);
+  }
 };
 
 module.exports = {
