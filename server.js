@@ -57,6 +57,17 @@ app.get("/api/runs", async (req, res) => {
       return total;
     }, 0);
 
+    //Calculate total kilometers run in the current week
+    const totalKilometersCurrentWeek = runs.reduce((total, run) => {
+      const runDate = new Date(run.start_date);
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Sunday as the start of the week
+      if (runDate >= startOfWeek) {
+        return total + run.distance / 1000; // Conversion of meters to km
+      }
+      return total;
+    }, 0);
+
     //Paginate the results
     const paginatedRuns = runs.slice((page - 1) * limit, page * limit);
 
@@ -65,6 +76,7 @@ app.get("/api/runs", async (req, res) => {
       runs: paginatedRuns,
       total: runs.length,
       totalKilometersLastWeek,
+      totalKilometersCurrentWeek,
     });
   } catch (error) {
     console.error("Error fetching runs:", error);
