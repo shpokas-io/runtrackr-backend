@@ -23,6 +23,9 @@ const fetchRuns = async (req, res) => {
     const totalKilometersLastWeek = calculateTotalKilometers(runs, 7);
     const totalKilometersCurrentWeek = calculateTotalKilometers(runs, 0);
 
+    console.log("Total Kilometers Last Week:", totalKilometersLastWeek);
+    console.log("Total Kilometers Current Week:", totalKilometersCurrentWeek);
+
     const paginatedRuns = runs.slice((page - 1) * limit, page * limit);
 
     res.json({
@@ -39,34 +42,33 @@ const fetchRuns = async (req, res) => {
 
 // Function to calculate total kilometers for a given week
 const calculateTotalKilometers = (runs, daysAgo) => {
-  const comparisonDate = new Date();
+  const now = new Date();
 
-  // If daysAgo is 0, we set the start of the week (Monday)
+  // Set the start of the week to Monday for the current week calculation (daysAgo = 0)
+  const comparisonDate = new Date(now);
   if (daysAgo === 0) {
     const dayOfWeek = comparisonDate.getDay();
-    const firstDayOfWeek = new Date(comparisonDate);
-    firstDayOfWeek.setDate(
-      comparisonDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)
-    );
-    comparisonDate.setHours(0, 0, 0, 0); // Set to start of the day
-    return runs.reduce((total, run) => {
-      const runDate = new Date(run.start_date);
-      if (runDate >= firstDayOfWeek) {
-        return total + run.distance / 1000; // conversion of meters to km
-      }
-      return total;
-    }, 0);
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    comparisonDate.setDate(comparisonDate.getDate() - daysFromMonday);
   } else {
-    // For last week
-    comparisonDate.setDate(comparisonDate.getDate() - daysAgo);
-    return runs.reduce((total, run) => {
-      const runDate = new Date(run.start_date);
-      if (runDate >= comparisonDate) {
-        return total + run.distance / 1000; // conversion of meters to km
-      }
-      return total;
-    }, 0);
+    // For last week, start on the Monday of last week
+    comparisonDate.setDate(
+      comparisonDate.getDate() - (7 + (comparisonDate.getDay() - 1))
+    );
   }
+
+  comparisonDate.setHours(0, 0, 0, 0); // Set time to start of the day
+
+  const totalDistance = runs.reduce((total, run) => {
+    const runDate = new Date(run.start_date);
+    if (runDate >= comparisonDate && (daysAgo === 0 || runDate < now)) {
+      return total + run.distance / 1000; // Convert meters to kilometers
+    }
+    return total;
+  }, 0);
+
+  // Return the total distance rounded to two decimal places
+  return Math.round(totalDistance * 100) / 100;
 };
 
 module.exports = {
