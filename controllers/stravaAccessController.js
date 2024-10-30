@@ -4,7 +4,7 @@ const { getLastRunAndGear } = require("../services/stravaService");
 
 const getAuthUrl = (req, res) => {
   const clientId = process.env.STRAVA_CLIENT_ID;
-  const redirectUri = "http://localhost:5000/auth/strava/callback";
+  const redirectUri = process.env.STRAVA_REDIRECT_URI;
   const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&approval_prompt=force&scope=activity:read,profile:read_all`;
   res.redirect(authUrl);
 };
@@ -33,7 +33,7 @@ const handleAuthCallback = async (req, res) => {
     const data = await getLastRunAndGear(accessToken);
 
     // Redirect to the frontend with user data
-    const redirectUri = `http://localhost:5173/?data=${encodeURIComponent(
+    const redirectUri = `${process.env.FRONTEND_URL}/?data=${encodeURIComponent(
       JSON.stringify({ accessToken, lastRun: data.lastRun, gear: data.gear })
     )}`;
     res.redirect(redirectUri);
