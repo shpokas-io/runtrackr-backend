@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
-
-// Define the shoe schema
+//test
 const shoeSchema = new mongoose.Schema({
   name: { type: String, required: true },
   category: { type: String, required: true },
