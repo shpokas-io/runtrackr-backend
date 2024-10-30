@@ -29,10 +29,7 @@ const handleAuthCallback = async (req, res) => {
 
     const accessToken = response.data.access_token;
 
-    // Fetch last run and gear data
     const data = await getLastRunAndGear(accessToken);
-
-    // Redirect to the frontend with user data
     const redirectUri = `${process.env.FRONTEND_URL}/?data=${encodeURIComponent(
       JSON.stringify({ accessToken, lastRun: data.lastRun, gear: data.gear })
     )}`;
