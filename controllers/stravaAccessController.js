@@ -1,42 +1,44 @@
-const axios = require("axios");
-const querystring = require("querystring");
-const { getLastRunAndGear } = require("../services/stravaService");
+const {
+  generateAuthUrl,
+  exchangeAuthorizationCode,
+  getLastRunAndGear,
+} = require("../services/stravaService");
+
+/**
+ * Redirects to the Strava OAuth authorization URL.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 
 const getAuthUrl = (req, res) => {
-  const clientId = process.env.STRAVA_CLIENT_ID;
-  const redirectUri = process.env.STRAVA_REDIRECT_URI;
-  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&approval_prompt=force&scope=activity:read,profile:read_all`;
+  const authUrl = generateAuthUrl();
   res.redirect(authUrl);
 };
 
+/**
+ * Handles the Strava OAuth callback, exchanges authorization code for access token,
+ * and redirects to the frontend with user data.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 const handleAuthCallback = async (req, res) => {
   const authorizationCode = req.query.code;
 
   if (!authorizationCode) {
-    return res.status(400).send("Authorization code missing");
+    return res.status(400).json({ message: "Authorization code missing" });
   }
 
   try {
-    const response = await axios.post(
-      "https://www.strava.com/oauth/token",
-      querystring.stringify({
-        client_id: process.env.STRAVA_CLIENT_ID,
-        client_secret: process.env.STRAVA_CLIENT_SECRET,
-        code: authorizationCode,
-        grant_type: "authorization_code",
-      })
-    );
-
-    const accessToken = response.data.access_token;
-
+    const accessToken = await exchangeAuthorizationCode(authorizationCode);
     const data = await getLastRunAndGear(accessToken);
+
     const redirectUri = `${process.env.FRONTEND_URL}/?data=${encodeURIComponent(
       JSON.stringify({ accessToken, lastRun: data.lastRun, gear: data.gear })
     )}`;
     res.redirect(redirectUri);
   } catch (error) {
     console.error("Error during token exchange:", error);
-    res.status(500).send("Error during token exchange");
+    res.status(500).json({ message: "Error during token exchange" });
   }
 };
 
