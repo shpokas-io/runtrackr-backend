@@ -29,7 +29,9 @@ const handleAuthCallback = async (req, res) => {
   }
 
   try {
+    console.log("Received authorization code:", authorizationCode); //debug
     const accessToken = await exchangeAuthorizationCode(authorizationCode);
+    console.log("Access Token:", accessToken); //debug
     const data = await getLastRunAndGear(accessToken);
 
     const redirectUri = `${process.env.FRONTEND_URL}/?data=${encodeURIComponent(

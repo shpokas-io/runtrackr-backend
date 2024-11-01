@@ -22,7 +22,7 @@ app.use(
 app.use(express.json());
 app.use("/api/shoes", shoeRoutes);
 app.use("/auth/strava", routes.stravaAuth);
-app.use("/api", routes.api);
+app.use("/api/runs", routes.api);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

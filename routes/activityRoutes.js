@@ -3,7 +3,8 @@ const { fetchRuns } = require("../controllers/activityController");
 
 const router = express.Router();
 
-// Route to fetch all runs
-router.get("/runs", (req, res) => fetchRuns(req, res));
+// Route to fetch all activities (runs)
+router.get("/activities", fetchRuns);
+router.get("/", fetchRuns);
 
 module.exports = router;

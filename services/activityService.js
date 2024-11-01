@@ -10,7 +10,7 @@ const fetchRunsData = async (accessToken) => {
   const response = await axios.get(
     "https://www.strava.com/api/v3/athlete/activities",
     {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `${accessToken}` },
       params: { per_page: 100, page: 1 },
     }
   );
